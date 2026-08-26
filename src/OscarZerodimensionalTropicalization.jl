@@ -1,6 +1,5 @@
 module OscarZerodimensionalTropicalization
 
-using OscarPuiseuxPolynomial
 using Oscar
 
 function __init__()

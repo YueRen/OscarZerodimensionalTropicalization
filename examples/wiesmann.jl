@@ -4,7 +4,6 @@
 
 using Revise
 using OscarZerodimensionalTropicalization
-using OscarPuiseuxPolynomial
 using Oscar
 Trop = OscarZerodimensionalTropicalization
 set_verbosity_level(:ZerodimensionalTropicalization, 1)

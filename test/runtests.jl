@@ -1,6 +1,5 @@
 using Test
 using OscarZerodimensionalTropicalization
-using OscarPuiseuxPolynomial
 using Oscar
 
 @testset "tropical_points_tadic_triangular.jl" begin

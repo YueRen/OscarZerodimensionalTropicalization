@@ -4,9 +4,16 @@
 #
 ###############################################################################
 
+function initial(f::Oscar.PuiseuxMPolyRingElem)
+    if iszero(f)
+        return zero(base_ring(parent(f)))
+    end
+    C = collect(coefficients(f))
+    return last(C)
+end
 
 @doc raw"""
-    has_non_constant_coefficients(fTilde::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}})
+    has_non_constant_coefficients(fTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}})
 
 Given a polynomial `fTilde` in $K[u_1,...,u_n][x_1,...,x_n]$, return `true` if
 `fTilde` has coefficients in $K[u_1,...,u_n]\setminus K$.  Return `false` if all
@@ -34,7 +41,7 @@ true
 
 ```
 """
-function has_non_constant_coefficients(fTilde::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}})
+function has_non_constant_coefficients(fTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}})
     for xCoeff in coefficients(fTilde)
         if any(!iszero, exponents(xCoeff))
             return true
@@ -46,7 +53,7 @@ end
 
 
 @doc raw"""
-    initial_zero(fTilde::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}})
+    initial_zero(fTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}})
 
 Given a polynomial `fTilde` in $K[u_1,...,u_n][x_1,...,x_n]$, return the initial
 of `fTilde` with respect to weight vector $(0,...,0)$.
@@ -73,7 +80,7 @@ julia> initial_zero(f2Tilde)
 
 ```
 """
-function initial_zero(fTilde::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}})
+function initial_zero(fTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}})
     # iterate over all x-coefficients (polynomials in u),
     # iterate over all u-coefficients (puiseux polynomials),
     # and record all valuations found. find the minimal one
@@ -98,7 +105,7 @@ end
 
 
 @doc raw"""
-    convert_for_roots_in_puiseux_expansion(h::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}})
+    convert_for_roots_in_puiseux_expansion(h::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}})
 
 Convert polynomial `h` in $K[x_i]\subseteq K{{t}}[u_1,\dots,u_n][x_1,\dots,x_n]$
 to a polynomial in $K[x_i]$.
@@ -119,7 +126,7 @@ julia> h = initial_zero(f1Tilde)
 {a1: 2.00000}*x1^2 + {a1: 2.00000}*x1
 
 julia> typeof(h)
-AbstractAlgebra.Generic.MPoly{AbstractAlgebra.Generic.MPoly{OscarPuiseuxPolynomial.MPuiseuxPolyRingElem{QQBarFieldElem}}}
+AbstractAlgebra.Generic.MPoly{AbstractAlgebra.Generic.MPoly{PuiseuxMPolyRingElem{QQBarFieldElem}}}
 
 julia> h = OscarZerodimensionalTropicalization.convert_for_roots_in_puiseux_expansion(h)
 {a1: 2.00000}*x1^2 + {a1: 2.00000}*x1
@@ -129,9 +136,9 @@ AbstractAlgebra.Generic.Poly{QQBarFieldElem}
 
 ```
 """
-function convert_for_roots_in_puiseux_expansion(h::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}})
+function convert_for_roots_in_puiseux_expansion(h::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}})
     Ktux = parent(h)
-    K = base_ring(base_ring(base_ring(Ktux)))
+    K = coefficient_ring(base_ring(base_ring(Ktux)))
     i = findfirst(!iszero, first(exponents(h)))
     Kx, (x) = polynomial_ring(K,symbols(Ktux)[i])
     newPoly = zero(Kx)
@@ -147,8 +154,10 @@ end
 
 
 
-function puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPolyRingElem}}, w::QQFieldElem, relPrecMax::QQFieldElem)
+function puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}}, w::QQFieldElem, relPrecMax::QQFieldElem)
     @req length(fiTilde)>1 "polynomial must not be monomial"
+
+    w = Rational{Int}(w) # workaround for
     
     Ktux = parent(fiTilde)
     Ktu = base_ring(Ktux)
@@ -165,12 +174,14 @@ function puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:MPuiseuxPoly
     end
 
     h = initial_zero(evaluate(fiTilde, vcat(zeros(Ktux, i-1), xi*t^w, zeros(Ktux, n-i))))
+    global _debug_h = h # BUG: h is still defined over puiseux polynomial ring
     if has_non_constant_coefficients(h) # maximum possible precision reached
         return [ui*t^w]
     end
 
     h = convert_for_roots_in_puiseux_expansion(h)
-
+    println(typeof(h))
+    println(h)
     newRoots = elem_type(Ktu)[]
     for c in roots(h)
         if iszero(c)

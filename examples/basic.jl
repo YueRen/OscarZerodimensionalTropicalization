@@ -1,8 +1,7 @@
 using Revise
 using OscarZerodimensionalTropicalization
-using OscarPuiseuxPolynomial
-using Oscar
 Trop = OscarZerodimensionalTropicalization
+using Oscar
 # set_verbosity_level(:PuiseuxExpansion, 1)
 # set_verbosity_level(:ZerodimensionalTropicalization, 1)
 

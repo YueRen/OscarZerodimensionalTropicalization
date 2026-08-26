@@ -79,7 +79,7 @@ function create_m_puiseux_polynomial_ring(Kt::Generic.RationalFunctionField)
     return Lt
 end
 
-function rational_function_to_puiseux_polynomial(c::Generic.RationalFunctionFieldElem, Lt::MPuiseuxPolyRing)
+function rational_function_to_puiseux_polynomial(c::Generic.RationalFunctionFieldElem, Lt::PuiseuxMPolyRing)
     @req isone(denominator(c)) "denominator of rational function must be 1"
     c = numerator(c)
     t = first(gens(Lt))
