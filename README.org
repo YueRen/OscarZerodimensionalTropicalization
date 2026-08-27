@@ -24,7 +24,6 @@ This package will eventually become part of OSCAR.  Until then, you can install 
 #+begin_src julia
   using Pkg
   Pkg.add(url="https://github.com/oscar-system/Oscar.jl", rev="master")
-  Pkg.add(url="https://github.com/ollieclarke8787/OscarPuiseuxPolynomials", rev="main")
   Pkg.add(url="https://github.com/YueRen/OscarZerodimensionalTropicalization", rev="main")
 #+end_src
 
@@ -32,7 +31,6 @@ or using the Pkg REPL (press ~]~ to enter):
 
 #+begin_src julia
   add https://github.com/oscar-system/Oscar.jl#master
-  add https://github.com/ollieclarke8787/OscarPuiseuxPolynomials#main
   add https://github.com/YueRen/OscarZerodimensionalTropicalization#main
 #+end_src
 
