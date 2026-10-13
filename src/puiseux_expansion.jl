@@ -180,8 +180,6 @@ function puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPoly
     end
 
     h = convert_for_roots_in_puiseux_expansion(h)
-    println(typeof(h))
-    println(h)
     newRoots = elem_type(Ktu)[]
     for c in roots(h)
         if iszero(c)
