@@ -19,18 +19,18 @@ In contrast to previous implementations, our implementation uses adaptive root-w
 
 * Installation
 
-This package will eventually become part of OSCAR.  Until then, you can install it manually together with its two dependencies as follows:
+This package will eventually become part of OSCAR.  Until then, you can install it manually on top of OSCAR as follows:
 
 #+begin_src julia
   using Pkg
-  Pkg.add(url="https://github.com/oscar-system/Oscar.jl", rev="master")
+  Pkg.add("Oscar")
   Pkg.add(url="https://github.com/YueRen/OscarZerodimensionalTropicalization", rev="main")
 #+end_src
 
 or using the Pkg REPL (press ~]~ to enter):
 
 #+begin_src julia
-  add https://github.com/oscar-system/Oscar.jl#master
+  add Oscar
   add https://github.com/YueRen/OscarZerodimensionalTropicalization#main
 #+end_src
 
