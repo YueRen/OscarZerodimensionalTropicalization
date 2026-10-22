@@ -27,7 +27,7 @@ Kx,x = polynomial_ring(K,n);
 #TropI = tropical_points_triangular(I, nu)
 #println(TropI)
 
-f1 = (x[1]^2- sum([t^i for i in 0:n]))
+f1 = (x[1]^2- sum([t^i for i in 0:n+1]))
 
 
 F = [f1]
