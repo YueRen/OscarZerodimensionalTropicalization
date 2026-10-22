@@ -414,12 +414,12 @@ function Base.show(io::IO, Gamma::RootTree)
     else
         println(io, "root tree of triangular system")
         for f in system(Gamma)
-            println(" ",f)
+            println(io," ",f)
         end
-        println("with edges ", collect(edges(Gamma)))
+        println(io,"with edges ", collect(edges(Gamma)))
         println(io, "with precisions and roots")
         for (i,(zTilde,zTildePrec)) in enumerate(zip(roots(Gamma),precs(Gamma)))
-            println(" ", i, ": (", zTildePrec, ") ", zTilde)
+            println(io," ", i, ": (", zTildePrec, ") ", zTilde)
         end
     end
 end
