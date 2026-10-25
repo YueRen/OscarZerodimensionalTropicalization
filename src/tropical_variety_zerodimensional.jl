@@ -71,31 +71,30 @@ function is_lower_triangular(F::Vector{<:MPolyRingElem})
     return true
 end
 
-function create_m_puiseux_polynomial_ring(Kt::Generic.RationalFunctionField)
-    K = base_ring(Kt)
-    tString = string(gen(Kt))
-    L = algebraic_closure(K)
-    Lt, _ = puiseux_polynomial_ring(L, [tString])
-    return Lt
-end
-
 function rational_function_to_puiseux_polynomial(c::Generic.RationalFunctionFieldElem, Lt::PuiseuxMPolyRing)
     @req isone(denominator(c)) "denominator of rational function must be 1"
     c = numerator(c)
     t = first(gens(Lt))
-    d = zero(Lt)
-    for (i, ci) in enumerate(coefficients(c))
-        d += t^i * Lt(ci)
-    end
-    return d
+    return sum(Lt(ci)*t^i for (i, ci) in enumerate(coefficients(c)); init=zero(Lt))
 end
 
-function prep_for_tropical_points_triangular(F::Vector{<:MPolyRingElem})
+@doc raw"""
+    tropical_points_triangular_prep_input(F::Vector{<:Generic.MPoly{<:Generic.RationalFunctionFieldElem}})
+
+Prepare a input of `tropical_points_triangular`, which given input with coeffiecients in `K(t)` means:
+1. clear all coefficient denominators so coefficients are in `K[t]`
+2. convert all coefficients to puiseux polynomials over the algebraic closure of `K`
+"""
+function tropical_points_triangular_prep_input(F::Vector{<:Generic.MPoly{<:Generic.RationalFunctionFieldElem}})
     F = [ f*lcm(denominator.(coefficients(f))) for f in F ] # clear denominators
 
     Ktx = parent(F[1])
     Kt = base_ring(Ktx)
-    Lt = create_m_puiseux_polynomial_ring(Kt)
+    K = base_ring(Kt)
+    tString = string(gen(Kt))
+
+    L = algebraic_closure(K)
+    Lt, _ = puiseux_polynomial_ring(L, [tString])
     Ltx, x = polynomial_ring(Lt, symbols(Ktx))
 
     homPrep = hom(Ktx, Ltx, c->rational_function_to_puiseux_polynomial(c, Lt), x)
@@ -147,7 +146,7 @@ function tropical_points_triangular(I::MPolyIdeal{<:Generic.MPoly{<:Generic.Rati
     # check that generators are triangular set and prep for root tree
     triangularSet = gens(I)
     @req is_lower_triangular(triangularSet) "Generators of input ideal must be lower triangular."
-    triangularSet = prep_for_tropical_points_triangular(triangularSet)
+    triangularSet = tropical_points_triangular_prep_input(triangularSet)
 
     # initialize root tree
     Gamma = root_tree(triangularSet, QQ(precision), QQ(precisionStep))
