@@ -154,6 +154,36 @@ end
 
 
 
+@doc raw"""
+    puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}}, w::QQFieldElem, relPrecMax::QQFieldElem)
+
+Compute the roots of `fiTilde` of valuation `w` using Puiseux expansion.
+Returned roots have relative precision that is either the maximal possible or
+`relPrecMax`, whichever is smaller.
+
+# Examples
+```jldoctest
+julia> K,(t,) = puiseux_polynomial_ring(algebraic_closure(QQ),["t"]);
+
+julia> Ku,u = polynomial_ring(K, "u"=>1:2);
+
+julia> Kux,x = polynomial_ring(Ku,2);
+
+julia> f1 = (x[1]^2+sum([t^i for i in 0:9]));
+
+julia> C = OscarZerodimensionalTropicalization.puiseux_expansion(f1, QQ(0), QQ(7))
+2-element Vector{AbstractAlgebra.Generic.MPoly{PuiseuxMPolyRingElem{QQBarFieldElem}}}:
+ t^8*u[1] + {a2: 0.209473*im}*t^7 + {a2: 0.225586*im}*t^6 + {a2: 0.246094*im}*t^5 + {a2: 0.273438*im}*t^4 + {a2: 0.312500*im}*t^3 + {a2: 0.375000*im}*t^2 + {a2: 0.500000*im}*t + {a2: 1.00000*im}
+ t^8*u[1] + {a2: -0.209473*im}*t^7 + {a2: -0.225586*im}*t^6 + {a2: -0.246094*im}*t^5 + {a2: -0.273438*im}*t^4 + {a2: -0.312500*im}*t^3 + {a2: -0.375000*im}*t^2 + {a2: -0.500000*im}*t + {a2: -1.00000*im}
+
+julia> C[1]^2+sum([t^i for i in 0:99]) # this should be above t^7
+t^16*u[1]^2 + ({a2: 0.418945*im}*t^15 + {a2: 0.451172*im}*t^14 + {a2: 0.492188*im}*t^13 + {a2: 0.546875*im}*t^12 + {a2: 0.625000*im}*t^11 + {a2: 0.750000*im}*t^10 + {a2: 1.00000*im}*t^9 + {a2: 2.00000*im}*t^8)*u[1] + t^99 + t^98 + t^97 + t^96 + t^95 + t^94 + t^93 + t^92 + t^91 + t^90 + t^89 + t^88 + t^87 + t^86 + t^85 + t^84 + t^83 + t^82 + t^81 + t^80 + t^79 + t^78 + t^77 + t^76 + t^75 + t^74 + t^73 + t^72 + t^71 + t^70 + t^69 + t^68 + t^67 + t^66 + t^65 + t^64 + t^63 + t^62 + t^61 + t^60 + t^59 + t^58 + t^57 + t^56 + t^55 + t^54 + t^53 + t^52 + t^51 + t^50 + t^49 + t^48 + t^47 + t^46 + t^45 + t^44 + t^43 + t^42 + t^41 + t^40 + t^39 + t^38 + t^37 + t^36 + t^35 + t^34 + t^33 + t^32 + t^31 + t^30 + t^29 + t^28 + t^27 + t^26 + t^25 + t^24 + t^23 + t^22 + t^21 + t^20 + t^19 + t^18 + t^17 + t^16 + t^15 + {a1: 0.956121}*t^14 + {a1: 0.905492}*t^13 + {a1: 0.846011}*t^12 + {a1: 0.774414}*t^11 + {a1: 0.685150}*t^10 + {a1: 0.567322}*t^9 + {a1: 0.392761}*t^8
+
+julia> C[2]^2+sum([t^i for i in 0:99]) # this should be above t^7
+t^16*u[1]^2 + ({a2: -0.418945*im}*t^15 + {a2: -0.451172*im}*t^14 + {a2: -0.492188*im}*t^13 + {a2: -0.546875*im}*t^12 + {a2: -0.625000*im}*t^11 + {a2: -0.750000*im}*t^10 + {a2: -1.00000*im}*t^9 + {a2: -2.00000*im}*t^8)*u[1] + t^99 + t^98 + t^97 + t^96 + t^95 + t^94 + t^93 + t^92 + t^91 + t^90 + t^89 + t^88 + t^87 + t^86 + t^85 + t^84 + t^83 + t^82 + t^81 + t^80 + t^79 + t^78 + t^77 + t^76 + t^75 + t^74 + t^73 + t^72 + t^71 + t^70 + t^69 + t^68 + t^67 + t^66 + t^65 + t^64 + t^63 + t^62 + t^61 + t^60 + t^59 + t^58 + t^57 + t^56 + t^55 + t^54 + t^53 + t^52 + t^51 + t^50 + t^49 + t^48 + t^47 + t^46 + t^45 + t^44 + t^43 + t^42 + t^41 + t^40 + t^39 + t^38 + t^37 + t^36 + t^35 + t^34 + t^33 + t^32 + t^31 + t^30 + t^29 + t^28 + t^27 + t^26 + t^25 + t^24 + t^23 + t^22 + t^21 + t^20 + t^19 + t^18 + t^17 + t^16 + t^15 + {a1: 0.956121}*t^14 + {a1: 0.905492}*t^13 + {a1: 0.846011}*t^12 + {a1: 0.774414}*t^11 + {a1: 0.685150}*t^10 + {a1: 0.567322}*t^9 + {a1: 0.392761}*t^8
+
+```
+"""
 function puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPolyRingElem}}, w::QQFieldElem, relPrecMax::QQFieldElem)
     @req length(fiTilde)>1 "polynomial must not be monomial"
 
