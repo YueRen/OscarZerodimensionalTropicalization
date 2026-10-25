@@ -39,6 +39,11 @@ julia> b, sigma = is_newton_polygon_well_defined_with_polygon(fTilde) # false
 ```
 """
 function is_newton_polygon_well_defined_with_polygon(fTilde::MPolyRingElem)
+    # check whether fTilde is non-monomial
+    if length(fTilde) <= 1
+        return false, polyhedron([[0]],[0])
+    end
+
     certainVals = QQFieldElem[]   # coefficient valuations that are certain
     degsWithCertainVal = Int[]
     uncertainVals = QQFieldElem[] # coefficient valuations that are uncertain
