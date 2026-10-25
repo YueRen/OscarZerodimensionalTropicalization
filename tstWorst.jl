@@ -39,3 +39,18 @@ end
 I = ideal(F)
 TropI = tropical_points_triangular(I, nu)
 println(TropI)
+
+
+## Terminates, but shouldn't the point be [0,infty]? Rather than [0,0]. 
+n = 2 
+Kx,x = polynomial_ring(K,n);
+f1 = (x[1]^2- sum([t^i for i in 0:n]))
+f2 = x[2]
+F = [f1,f2]
+I = ideal(F)
+TropI = tropical_points_triangular(I, nu)
+println(TropI)
+
+
+
+
