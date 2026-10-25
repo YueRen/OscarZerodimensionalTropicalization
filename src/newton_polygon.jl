@@ -1,9 +1,8 @@
 @doc raw"""
     is_newton_polygon_well_defined_with_polyhedron(fTilde::MPolyRingElem)
 
-Return `true` and the Newton polygon of `fTilde` if it is well-defined with
-respect to the tropical semiring map `nu`.  Return `false` and an empty polygon
-otherwise.
+Return `true` and the Newton polygon of `fTilde` if it is well-defined.  Return
+`false` and an empty polygon otherwise.
 
 !!! warn
     Assumes that `fTilde` is univariate over the uncertainty ring.
@@ -39,9 +38,13 @@ julia> b, sigma = is_newton_polygon_well_defined_with_polygon(fTilde) # false
 ```
 """
 function is_newton_polygon_well_defined_with_polygon(fTilde::MPolyRingElem)
-    # check whether fTilde is non-monomial
-    if length(fTilde) <= 1
-        return false, polyhedron([[0]],[0])
+    @hassert :PuiseuxExpansion !iszero(fTilde)
+    @hassert :PuiseuxExpansion !iszero(total_degree(fTilde))
+
+    if length(fTilde) == 1
+        # if fTilde is monomial of degree d, then it only has root 0.
+        # return as newton polygon (d,0) + RR_{\geq 0} \cdot (0,1)
+        return true, polyhedron(([0 -1], [0]),([1 0],[total_degree(fTilde)]))
     end
 
     certainVals = QQFieldElem[]   # coefficient valuations that are certain

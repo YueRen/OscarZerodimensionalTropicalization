@@ -228,9 +228,13 @@ function puiseux_expansion(fiTilde::MPolyRingElem{<:MPolyRingElem{<:PuiseuxMPoly
 
         # compute the next term
         canComputeNextTerm, sigma = is_newton_polygon_well_defined_with_polygon(g)
-        if !canComputeNextTerm
+        if !canComputeNextTerm # g has insufficient precision
             return [ui*t^w]
         end
+        if dim(sigma) == 1 # g has only root 0
+            return [zero(Ktu)]
+        end
+
         nextExponents = [ v[1]/v[2] for v in normal_vector.(facets(sigma)) if v[2]<0 && v[1]/v[2]>w]
         for nextExponent in nextExponents
             @vprintln :PuiseuxExpansion "  Enter recursion for exponent $(nextExponent) and precision $(relPrecMax - (w - nextExponent))"

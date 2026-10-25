@@ -365,16 +365,27 @@ function is_zerodimensional_triangular_set(triangularSystem::Vector{<:MPolyRingE
     return true
 end
 
-
 @doc raw"""
     bud(sigma::Polyhedron, u::MPolyRingElem)
 
 Return a `RootTree` representing the new leaves arising from the
-well-defined extended Newton polyhedron `sigma`.  Each new leaf is assigned
-the uncertainty variable `u` multiplied by `t` to the power of the
-negated slope of a lower facet of `sigma`.
+well-defined extended Newton polyhedron `sigma`.
+
+If `sigma` is one-dimensional, then the only next root is `0`.  Otherwise, each
+new leaf is assigned the uncertainty variable `u` multiplied by `t` to the power
+of the negated slope of a lower facet of `sigma`.
 """
 function bud(sigma::Polyhedron, u::MPolyRingElem)
+    if dim(sigma) == 1
+        system = MPolyRingElem[]
+        tree = Graph{Directed}(2)
+        add_edge!(tree, 1, 2)
+        Ku = parent(u)
+        roots = zeros(Ku,2)
+        precs = zeros(QQ,2)
+        return RootTree(system, tree, roots, precs)
+    end
+
     # compute a list of negated slopes of sigma from the outer normal vectors `v`
     # - v[2]<0 means a non-vertical facet
     # - v[1]/v[2] is the negated slope
@@ -382,20 +393,19 @@ function bud(sigma::Polyhedron, u::MPolyRingElem)
 
     # construct the RootTree
     system = MPolyRingElem[]
-    tree = Graph{Directed}(1)
+    tree = Graph{Directed}(length(negatedSlopes)+1)
     Ku = parent(u)
     roots = zeros(Ku,1)
     precs = QQFieldElem[0]
     t = first(gens(base_ring(Ku)))
-    for lambda in negatedSlopes
+    for (i,lambda) in enumerate(negatedSlopes)
         # For each lower slope lambda add
         #  - u*t^lambda to roots,
         #  - 0 to precs,
         #  - an edge to tree.
         push!(roots, u*t^Rational{Int64}(lambda))
         push!(precs, QQ(0))
-        add_vertex!(tree)
-        add_edge!(tree, 1, n_vertices(tree))
+        add_edge!(tree, 1, i+1)
     end
 
     return RootTree(system, tree, roots, precs)
@@ -447,7 +457,7 @@ function pick_ungrown_leaf(Gamma::RootTree; strategy::Symbol=:depth_first)
     GammaLeaves = leaves(Gamma)
     depths = length.(shortest_path_dijkstra.(Ref(Gamma), 1, GammaLeaves)) .-1
     maxDepth = length(system(Gamma))
-    ungrownLeaves = [i for (i,l) in zip(GammaLeaves, depths) if l<maxDepth]
+    ungrownLeaves = [i for (i,l) in zip(GammaLeaves, depths) if l<maxDepth && !iszero(root(Gamma,i))]
     if isempty(ungrownLeaves)
         return -1
     end
@@ -510,8 +520,14 @@ function grow!(Gamma::RootTree, leaf::Int)
     # if yes, use it to extend Gamma at leaf
     canExtend, sigma = is_newton_polygon_well_defined_with_polygon(fTilde)
     if canExtend
+        # sufficient precision, extend the tree with leaves with uncertain roots
         ui = uncertainty_variable(Gamma,depth(Gamma,leaf))
         graft!(Gamma, leaf, bud(sigma,ui))
+    else
+        # insufficient precision, increase precision and improve the root at leaf
+        reinforce!(Gamma,leaf)
+    end
+    if canExtend<0
     end
     return canExtend
 end
@@ -623,6 +639,9 @@ function tropical_points(Gamma::RootTree)
     GammaLeaves = leaves(Gamma)
     GammaTrop = Vector{QQFieldElem}[]
     for GammaLeaf in GammaLeaves
+        if iszero(root(Gamma,GammaLeaf)) # leaf corresponds to point outside torus, no tropical point to add
+            continue
+        end
         GammaBranch = branch(Gamma,GammaLeaf)
         tropicalRoot = root_valuation.(Ref(Gamma), GammaBranch[2:end])
         if !(tropicalRoot in GammaTrop)

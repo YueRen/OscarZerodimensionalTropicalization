@@ -156,9 +156,6 @@ function tropical_points_triangular(I::MPolyIdeal{<:Generic.MPoly{<:Generic.Rati
     leafToGrow = 1
     while leafToGrow>0
         growthSuccessful = grow!(Gamma,leafToGrow)
-        if !growthSuccessful
-            reinforce!(Gamma,leafToGrow)
-        end
         @vprintln :ZerodimensionalTropicalization "Updated root tree:\n$(Gamma)"
         leafToGrow = pick_ungrown_leaf(Gamma)
     end
